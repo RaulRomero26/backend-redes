@@ -5,7 +5,7 @@
 const { Router } = require('express');
 //se importan las diferentes funciones que realizan las consultas sql
 const { RemisionesByName, TelefonoByRemision,ContactoByRemision, HistoricoByName, InspeccionByName ,VehiculoByInspeccion
-    ,DetenidoCon
+    ,DetenidoCon, BuscarTelefono,RemisionesByTelefono, BuscarVehiculo
 } = require('../controllers/search.controller');
 // se crea el router asi como las diferentes rutas que son los endpoint de la informacion
 const router = Router();
@@ -17,5 +17,8 @@ router.post('/historico',HistoricoByName);
 router.post('/inspeccion',InspeccionByName);
 router.post('/detenidoCon',DetenidoCon);
 router.post('/vehiculoInspeccion',VehiculoByInspeccion)
+router.post('/telefono-contacto', BuscarTelefono)
+router.post('/remisionesTelefono',RemisionesByTelefono);
+router.post('/vehiculoRemision', BuscarVehiculo);
 
 module.exports = router;

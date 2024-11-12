@@ -2,7 +2,7 @@
 puerto sobr eel que va a salir, middlewares, archivos estaticos, rutas, etc. */
 const express = require('express');
 const cors = require('cors');
-
+const { dbConectionTelefono } = require('../db/configTelefono');
 
 class Server {
 
@@ -13,9 +13,18 @@ class Server {
 
         //Middlewares
         this.middlewares();
+
+        //Conectar a base de datos
+        this.conectarDB();
         //Rutas de la aplicacion
         this.routes();
     }
+
+    async conectarDB(){
+        await dbConectionTelefono();
+     //    await dbConectionTelefono();
+     }
+ 
 
     middlewares(){
         //CORS
