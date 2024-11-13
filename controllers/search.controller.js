@@ -183,23 +183,32 @@ const BuscarTelefono = async(req = request, res = response) => {
 }
 
 const RemisionesByTelefono = async(req = request, res = response) => {  
-    console.log(req.body);
-    const {label} = req.body;
+    console.log('TELEFONO EN REMISIONES:', req.body);
+    const { label } = req.body;
 
-    let coincidencias = await saraiPromisePool.query(`
-        SELECT *
-        FROM argos_detenido_datos_personales 
-        WHERE 
-        Telefono = ${label}
+    try {
+        let coincidencias = await saraiPromisePool.query(`
+            SELECT *
+            FROM argos_detenido_datos_personales 
+            WHERE 
+            Telefono = '${label}'
         `);
-    
-    res.json({
-        ok: true,
-        msg: 'Remisiones encontradas',
-        data: {
-            remisiones: coincidencias[0]
-        }
-    });
+        
+        res.json({
+            ok: true,
+            msg: 'Remisiones encontradas',
+            data: {
+                remisiones: coincidencias[0]
+            }
+        });
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar remisiones',
+            error: error.message
+        });
+    }
 }
 
 const BuscarVehiculo = async(req = request, res = response) => {    
