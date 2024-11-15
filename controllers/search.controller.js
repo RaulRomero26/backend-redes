@@ -265,14 +265,14 @@ const BuscarTelefono = async (req = request, res = response) => {
 
 const RemisionesByTelefono = async (req = request, res = response) => {
     console.log('TELEFONO EN REMISIONES:', req.body);
-    const { label } = req.body;
+    const { telefono } = req.body;
 
     try {
         let coincidencias = await saraiPromisePool.query(`
             SELECT *
             FROM argos_detenido_datos_personales 
             WHERE 
-            Telefono = '${label}'
+            Telefono IN (${telefono})
         `);
 
         res.json({
@@ -348,6 +348,34 @@ const BuscarVehiculo = async (req = request, res = response) => {
 
 };
 
+const BuscarContactosTelefono = async (req = request, res = response) => {
+const{label, telefono} = req.body;
+    try {
+        let coincidencias = await saraiPromisePool.query(`
+            SELECT * 
+            FROM contacto_detenido
+            WHERE
+            Telefono IN('${telefono}')
+            `);
+
+        res.json({
+            ok: true,
+            msg: 'Contactos encontrados',
+            data: {
+                contactos: coincidencias[0]
+            }
+        });
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar contactos',
+            error: error.message
+        });
+    }
+
+}
+
 module.exports = {
     RemisionesByName,
     TelefonoByRemision,
@@ -358,5 +386,6 @@ module.exports = {
     VehiculoByInspeccion,
     BuscarTelefono,
     RemisionesByTelefono,
+    BuscarContactosTelefono,
     BuscarVehiculo
 }
