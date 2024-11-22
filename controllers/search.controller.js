@@ -376,6 +376,62 @@ const{label, telefono} = req.body;
 
 }
 
+const BuscarLlamadas911 = async (req = request, res = response) => {
+    console.log(req.body);
+    const {telefono} = req.body;
+
+    try {
+        const llamadas = await TelefonoSSC.find({Telefono: telefono}).lean();
+
+        res.json({
+            ok: true,
+            msg: 'Llamadas encontradas',
+            data: {
+                llamadas
+            }
+        });
+
+    }catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar llamadas',
+            error: error.message
+        });
+
+    }
+};
+
+const BuscarPersonasInspeccion = async (req = request, res = response) => {
+    console.log(req.body);
+    const {inspeccion} = req.body;
+
+    try {
+        let coincidencias = await saraiPromisePool.query(`
+            SELECT *
+            FROM argos_inspeccion_persona
+            WHERE Id_Inspeccion = ${inspeccion}
+            `);
+
+        res.json({
+            ok: true,
+            msg: 'Personas encontradas',
+            data: {
+                personas: coincidencias[0]
+            }
+        });
+
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar personas',
+            error: error.message
+        });
+
+    }
+}
+
 module.exports = {
     RemisionesByName,
     TelefonoByRemision,
@@ -387,5 +443,7 @@ module.exports = {
     BuscarTelefono,
     RemisionesByTelefono,
     BuscarContactosTelefono,
-    BuscarVehiculo
+    BuscarVehiculo,
+    BuscarLlamadas911,
+    BuscarPersonasInspeccion
 }
