@@ -110,22 +110,44 @@ const InspeccionByName = async (req = request, res = response) => {
 const VehiculoByInspeccion = async (req = request, res = response) => {
     console.log('entro a la funcion');
     console.log(req.body);
-    const { inspeccion,placas,NIV } = req.body;
-    let query = '';
-    if(inspeccion != undefined && inspeccion != ''){
-        query = `SELECT * FROM vehiculo_inspeccion WHERE Id_Inspeccion = ${inspeccion}`;
-    }
-    if(placas != undefined && placas != ''){
-        query = `SELECT * FROM vehiculo_inspeccion WHERE Placas_Vehiculo = '${placas}'`;
-    }
-    if(NIV != undefined && NIV != ''){
-        query = `SELECT * FROM vehiculo_inspeccion WHERE NIV = '${NIV}'`;
-    }
+    const { inspeccion,placas,niv } = req.body;
+    let query = `SELECT ubicacion.*, persona_inspeccion.*,vehiculo_inspeccion.*, inspeccion.* 
+                FROM vehiculo_inspeccion 
+                LEFT JOIN inspeccion ON vehiculo_inspeccion.Id_Inspeccion = inspeccion.Id_Inspeccion 
+                LEFT JOIN ubicacion ON ubicacion.Id_Ubicacion = inspeccion.Id_Ubicacion 
+                LEFT JOIN persona_inspeccion ON inspeccion.Id_Inspeccion = persona_inspeccion.Id_Inspeccion
+                WHERE `;
 
-    if(placas != undefined && NIV != undefined){
-        query = `SELECT * FROM vehiculo_inspeccion WHERE Placas_Vehiculo = '${placas}' OR NIV = '${NIV}'`;
+    if (inspeccion != undefined && inspeccion != '') {
+        query += `vehiculo_inspeccion.Id_Inspeccion = ${inspeccion}`;
+    } else if (placas != undefined && placas != '' && !['SD', 'S/D', 'sd', 's/d'].includes(placas)) {
+        query += `vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`;
+    } else if (niv != undefined && niv != '' && !['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
+        query += `vehiculo_inspeccion.NIV = '${niv}'`;
+    } else if (placas != undefined && niv != undefined) {
+        let conditions = [];
+        if (!['SD', 'S/D', 'sd', 's/d'].includes(placas)) {
+            conditions.push(`vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`);
+        }
+        if (!['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
+            conditions.push(`vehiculo_inspeccion.NIV = '${niv}'`);
+        }
+        if (conditions.length > 0) {
+            query += conditions.join(' OR ');
+        } else {
+            res.status(400).json({
+                ok: false,
+                msg: 'No valid search criteria provided'
+            });
+            return;
+        }
+    } else {
+        res.status(400).json({
+            ok: false,
+            msg: 'No search criteria provided'
+        });
+        return;
     }
-
     try {
 
         let coincidencias = await saraiPromisePool.query(`
@@ -296,33 +318,40 @@ const BuscarVehiculo = async (req = request, res = response) => {
 
     console.log(req.body);
     const { placa, niv } = req.body;
+    let query = '';
 
     if (placa != undefined && placa != '' && placa != 'SD' && placa != 'S/D') {
         query = `
-        SELECT *
+        SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
+        LEFT JOIN vehiculos ON vehiculos.No_Remision = argos_vehiculos_asegurados.No_Remision
         WHERE 
         Placa_Vehiculo COLLATE utf8mb4_unicode_ci = '${placa}'
-        `
-    }
-    if (niv != undefined && niv != '' && niv != 'SD' && niv != 'S/D') {
+        `;
+    } else if (niv != undefined && niv != '' && niv != 'SD' && niv != 'S/D') {
         query = `
-        SELECT *
+        SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
+        LEFT JOIN vehiculos ON vehiculos.No_Remision = argos_vehiculos_asegurados.No_Remision
         WHERE 
         No_Serie COLLATE utf8mb4_unicode_ci = '${niv}'
-        `
-    }
-    if (placa != undefined && niv != undefined) {
+        `;
+    } else if (placa != undefined && niv != undefined) {
         query = `
-        SELECT *
+        SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
+        LEFT JOIN vehiculos ON vehiculos.No_Remision = argos_vehiculos_asegurados.No_Remision
         WHERE 
         Placa_Vehiculo COLLATE utf8mb4_unicode_ci = '${placa}'
         OR No_Serie COLLATE utf8mb4_unicode_ci = '${niv}'
-        `
+        `;
+    } else {
+        res.status(400).json({
+            ok: false,
+            msg: 'No search criteria provided'
+        });
+        return;
     }
-
     try {
 
         let coincidencias = await saraiPromisePool.query(query);
