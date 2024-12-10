@@ -120,13 +120,13 @@ const VehiculoByInspeccion = async (req = request, res = response) => {
 
     if (inspeccion != undefined && inspeccion != '') {
         query += `vehiculo_inspeccion.Id_Inspeccion = ${inspeccion}`;
-    } else if (placas != undefined && placas != '' && !['SD', 'S/D', 'sd', 's/d'].includes(placas)) {
+    } else if (placas != undefined && placas != '' && !['SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas) && placas.length>4) {
         query += `vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`;
     } else if (niv != undefined && niv != '' && !['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
         query += `vehiculo_inspeccion.NIV = '${niv}'`;
     } else if (placas != undefined && niv != undefined) {
         let conditions = [];
-        if (!['SD', 'S/D', 'sd', 's/d'].includes(placas)) {
+        if (!['SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas)) {
             conditions.push(`vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`);
         }
         if (!['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
@@ -320,7 +320,7 @@ const BuscarVehiculo = async (req = request, res = response) => {
     const { placa, niv } = req.body;
     let query = '';
 
-    if (placa != undefined && placa != '' && placa != 'SD' && placa != 'S/D') {
+    if (placa != undefined && placa != '' && placa != 'SD' && placa != 'S/D' && placa != 'sp' && placa != 'SP' && placa != 's/p' && placa != 'S/P' && placa.length>4) {
         query = `
         SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
@@ -328,7 +328,7 @@ const BuscarVehiculo = async (req = request, res = response) => {
         WHERE 
         Placa_Vehiculo COLLATE utf8mb4_unicode_ci = '${placa}'
         `;
-    } else if (niv != undefined && niv != '' && niv != 'SD' && niv != 'S/D') {
+    } else if (niv != undefined && niv != '' && niv != 'SD' && niv != 'S/D' && niv != 'sp' && niv != 'SP' && niv != 's/p' && niv != 'S/P') {
         query = `
         SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
