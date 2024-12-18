@@ -120,16 +120,16 @@ const VehiculoByInspeccion = async (req = request, res = response) => {
 
     if (inspeccion != undefined && inspeccion != '') {
         query += `vehiculo_inspeccion.Id_Inspeccion = ${inspeccion}`;
-    } else if (placas != undefined && placas != '' && !['SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas) && placas.length>4) {
+    } else if (placas != undefined && placas != '' && !['SIN PLACA','sin placa','SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas) && placas.length>4) {
         query += `vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`;
-    } else if (niv != undefined && niv != '' && !['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
+    } else if (niv != undefined && niv != '' && !['SIN NIV','sin niv','SD', 'S/D', 'sd', 's/d'].includes(niv)) {
         query += `vehiculo_inspeccion.NIV = '${niv}'`;
     } else if (placas != undefined && niv != undefined) {
         let conditions = [];
-        if (!['SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas)) {
+        if (!['SIN PLACA','sin placa','SD', 'S/D', 'sd', 's/d','sp','s/p','SP','S/P'].includes(placas)) {
             conditions.push(`vehiculo_inspeccion.Placas_Vehiculo = '${placas}'`);
         }
-        if (!['SD', 'S/D', 'sd', 's/d'].includes(niv)) {
+        if (!['SIN NIV','sin niv','SD', 'S/D', 'sd', 's/d'].includes(niv)) {
             conditions.push(`vehiculo_inspeccion.NIV = '${niv}'`);
         }
         if (conditions.length > 0) {
@@ -320,7 +320,7 @@ const BuscarVehiculo = async (req = request, res = response) => {
     const { placa, niv } = req.body;
     let query = '';
 
-    if (placa != undefined && placa != '' && placa != 'SD' && placa != 'S/D' && placa != 'sp' && placa != 'SP' && placa != 's/p' && placa != 'S/P' && placa.length>4) {
+    if (placa != undefined && placa != 'SIN PLACA' && placa != 'sin placa' && placa != '' && placa != 'SD' && placa != 'S/D' && placa != 'sp' && placa != 'SP' && placa != 's/p' && placa != 'S/P' && placa.length>4) {
         query = `
         SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
@@ -328,7 +328,7 @@ const BuscarVehiculo = async (req = request, res = response) => {
         WHERE 
         Placa_Vehiculo COLLATE utf8mb4_unicode_ci = '${placa}'
         `;
-    } else if (niv != undefined && niv != '' && niv != 'SD' && niv != 'S/D' && niv != 'sp' && niv != 'SP' && niv != 's/p' && niv != 'S/P') {
+    } else if (niv != undefined && niv != 'SIN NIV' && niv != 'sin niv' && niv != '' && niv != 'SD' && niv != 'S/D' && niv != 'sp' && niv != 'SP' && niv != 's/p' && niv != 'S/P') {
         query = `
         SELECT vehiculos.*, argos_vehiculos_asegurados.*
         FROM argos_vehiculos_asegurados 
