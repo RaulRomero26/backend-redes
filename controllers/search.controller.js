@@ -4,6 +4,7 @@
 // Se importan el response y el request de express para tener el tipado
 const { response, request } = require('express');
 const { saraiPromisePool } = require('../db/configSarai');
+const { auraPromisePool } = require('../db/configAura');
 const { TelefonoContactos, TelefonoSSC } = require('../models/telefono');
 
 const RemisionesByName = async (req = request, res = response) => {
@@ -461,6 +462,68 @@ const BuscarPersonasInspeccion = async (req = request, res = response) => {
     }
 }
 
+const BuscarPersonasAura = async (req = request, res = response) => {
+    console.log(req.body);
+    const { label, tipo } = req.body;
+
+    try {
+        let coincidencias = await auraPromisePool.query(`
+            SELECT *
+            FROM gc_seguimiento_filtro_2
+            WHERE Nombre_completo = '${label}'
+            `);
+
+        res.json({
+            ok: true,
+            msg: 'Personas encontradas',
+            data: {
+                aura: coincidencias[0]
+            }
+        });
+
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar personas',
+            error: error.message
+        });
+
+    }
+}
+const BuscarPersonasBanda = async (req = request, res = response) => {
+    console.log(req.body);
+    const { Banda } = req.body;
+
+    try {
+        let coincidencias = await auraPromisePool.query(`
+            SELECT persona_gabinete.Nombre, persona_gabinete.Ap_Paterno, persona_gabinete.Ap_Materno, gc_seguimiento_filtro_2.*
+            FROM gc_seguimiento_filtro_2
+            LEFT JOIN persona_gabinete
+            ON gc_seguimiento_filtro_2.Id_persona = persona_gabinete.Id_persona
+            WHERE Nombre_grupo_delictivo = '${Banda}'
+            `);
+
+        res.json({
+            ok: true,
+            msg: 'Personas encontradas',
+            data: {
+                personas: coincidencias[0]
+            }
+        });
+
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar personas',
+            error: error.message
+        });
+
+    }
+}
+
+
 module.exports = {
     RemisionesByName,
     TelefonoByRemision,
@@ -474,5 +537,7 @@ module.exports = {
     BuscarContactosTelefono,
     BuscarVehiculo,
     BuscarLlamadas911,
-    BuscarPersonasInspeccion
+    BuscarPersonasInspeccion,
+    BuscarPersonasAura,
+    BuscarPersonasBanda
 }
