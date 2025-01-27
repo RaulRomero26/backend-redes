@@ -496,12 +496,13 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
     const { Banda } = req.body;
 
     try {
+        const bandaList = Banda.split(',').map(b => `'${b.trim()}'`).join(', ');
         let coincidencias = await auraPromisePool.query(`
             SELECT persona_gabinete.Nombre, persona_gabinete.Ap_Paterno, persona_gabinete.Ap_Materno, gc_seguimiento_filtro_2.*
             FROM gc_seguimiento_filtro_2
             LEFT JOIN persona_gabinete
             ON gc_seguimiento_filtro_2.Id_persona = persona_gabinete.Id_persona
-            WHERE Nombre_grupo_delictivo IN (${Banda})
+            WHERE Nombre_grupo_delictivo IN (${bandaList})
             `);
 
         res.json({
