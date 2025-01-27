@@ -501,7 +501,7 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
             FROM gc_seguimiento_filtro_2
             LEFT JOIN persona_gabinete
             ON gc_seguimiento_filtro_2.Id_persona = persona_gabinete.Id_persona
-            WHERE Nombre_grupo_delictivo = '${Banda}'
+            WHERE Nombre_grupo_delictivo IN (${Banda})
             `);
 
         res.json({
