@@ -501,7 +501,7 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
             SELECT persona_gabinete.Nombre, persona_gabinete.Ap_Paterno, persona_gabinete.Ap_Materno, gc_seguimiento_filtro_2.*
             FROM gc_seguimiento_filtro_2
             LEFT JOIN persona_gabinete
-            ON gc_segumimiento_filtro_2.Id_persona = persona_gabinete.Id_persona
+            ON gc_segumimiento_filtro_2.Id_Persona = persona_gabinete.Id_Persona
             WHERE Nombre_grupo_delictivo IN (${bandaList})
             `);
 
