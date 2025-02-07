@@ -379,7 +379,7 @@ const BuscarVehiculo = async (req = request, res = response) => {
 };
 
 const BuscarContactosTelefono = async (req = request, res = response) => {
-const{label, telefono} = req.body;
+    const{label, telefono} = req.body;
     try {
         let coincidencias = await saraiPromisePool.query(`
             SELECT * 
@@ -472,14 +472,25 @@ const BuscarPersonasAura = async (req = request, res = response) => {
             FROM gc_seguimiento_filtro_2
             WHERE Nombre_completo = '${label}'
             `);
-
-        res.json({
-            ok: true,
-            msg: 'Personas encontradas',
-            data: {
-                aura: coincidencias[0]
-            }
-        });
+        
+        if (coincidencias[0].length > 0){
+            res.json({
+                ok: true,
+                msg: 'Personas encontradas',
+                data: {
+                    aura: coincidencias[0]
+                }
+            });
+        }else {
+            res.json({
+                ok: true,
+                msg: 'Personas encontradas',
+                data: {
+                    aura: []
+                }
+            });
+        }
+       
 
     } catch (error) {
         console.error('Database query error:', error);
@@ -495,24 +506,41 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
     console.log(req.body);
     const { Banda } = req.body;
 
+    if (!Banda || Banda.trim() === '') {
+        return res.status(400).json({
+            ok: false,
+            msg: 'No search criteria provided'
+        });
+    }
+
     try {
         const bandaList = Banda.split(',').map(b => `'${b.trim()}'`).join(', ');
+
         let coincidencias = await auraPromisePool.query(`
             SELECT persona_gabinete.Nombre, persona_gabinete.Ap_Paterno, persona_gabinete.Ap_Materno, gc_seguimiento_filtro_2.*
             FROM gc_seguimiento_filtro_2
             LEFT JOIN persona_gabinete
-            ON gc_seguimiento_filtro_2.Id_Persona = persona_gabinete.Id_Persona
+            ON gc_seguimiento_filtro_2.Id_persona = persona_gabinete.Id_persona
             WHERE Nombre_grupo_delictivo IN (${bandaList})
-            `);
+        `);
 
-        res.json({
-            ok: true,
-            msg: 'Personas encontradas',
-            data: {
-                personas: coincidencias[0]
-            }
-        });
-
+        if (coincidencias[0].length > 0) {
+            res.json({
+                ok: true,
+                msg: 'Personas encontradas',
+                data: {
+                    aura: coincidencias[0]
+                }
+            });
+        } else {
+            res.json({
+                ok: true,
+                msg: 'Personas encontradas',
+                data: {
+                    aura: []
+                }
+            });
+        }
     } catch (error) {
         console.error('Database query error:', error);
         res.status(500).json({
@@ -520,7 +548,6 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
             msg: 'Error al buscar personas',
             error: error.message
         });
-
     }
 }
 
