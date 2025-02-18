@@ -289,14 +289,15 @@ const BuscarTelefono = async (req = request, res = response) => {
 const RemisionesByTelefono = async (req = request, res = response) => {
     console.log('TELEFONO EN REMISIONES:', req.body);
     const { telefono } = req.body;
-
+    const telefonos = telefono.split(',').map(tel => tel.trim()); // ['telefono1', 'telefono2']
+    const regexp = telefonos.map(tel => `(^|,)${tel}(,|$)`).join('|').replace(/[\\"']/g, '\\$&');
+   
     try {
         let coincidencias = await saraiPromisePool.query(`
-            SELECT *
-            FROM argos_detenido_datos_personales 
-            WHERE 
-            Telefono IN (${telefono})
-        `);
+        SELECT *
+        FROM argos_detenido_datos_personales 
+        WHERE Telefono REGEXP '${regexp}'
+    `);
 
         res.json({
             ok: true,
