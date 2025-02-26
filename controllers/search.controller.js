@@ -552,6 +552,46 @@ const BuscarPersonasBanda = async (req = request, res = response) => {
     }
 }
 
+const BuscarUbicacionesRemision = async (req = request, res = response) => {
+    console.log(req.body);
+    const { remision } = req.body;
+
+    try {
+
+        let domicilio = await saraiPromisePool.query(`Select * from argos_domicilio_detenido where No_Remision = ${remision}`);
+        let detencion = await saraiPromisePool.query(`Select * from argos_domicilio_detenido where No_Remision = ${remision}`);
+        let hechos = await saraiPromisePool.query(`Select * from argos_ubicacion_hechos where No_Remision = ${remision}`);
+        console.log({
+            ubicaciones: {
+                domicilio: domicilio[0],
+                detencion: detencion[0],
+                hechos: hechos[0],
+                remision: remision
+            }
+        })
+        res.json({
+            ok: true,
+            msg: 'Ubicaciones encontradas',
+            data: {
+                ubicaciones: {
+                    domicilio: domicilio[0],
+                    detencion: detencion[0],
+                    hechos: hechos[0],
+                    remision: remision
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar ubicaciones',
+            error: error.message
+        });
+
+    }
+}
+
 
 module.exports = {
     RemisionesByName,
@@ -568,5 +608,6 @@ module.exports = {
     BuscarLlamadas911,
     BuscarPersonasInspeccion,
     BuscarPersonasAura,
-    BuscarPersonasBanda
+    BuscarPersonasBanda,
+    BuscarUbicacionesRemision
 }
