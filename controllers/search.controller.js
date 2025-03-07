@@ -559,7 +559,7 @@ const BuscarUbicacionesRemision = async (req = request, res = response) => {
     try {
 
         let domicilio = await saraiPromisePool.query(`Select * from argos_domicilio_detenido where No_Remision = ${remision}`);
-        let detencion = await saraiPromisePool.query(`Select * from argos_domicilio_detenido where No_Remision = ${remision}`);
+        let detencion = await saraiPromisePool.query(`Select * from argos_ubicacion_detencion where No_Remision = ${remision}`);
         let hechos = await saraiPromisePool.query(`Select * from argos_ubicacion_hechos where No_Remision = ${remision}`);
         console.log({
             ubicaciones: {
